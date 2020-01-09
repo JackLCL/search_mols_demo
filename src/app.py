@@ -1,10 +1,9 @@
 import os
 import os.path as path
 import logging
-from common.config import DATA_PATH, DEFAULT_TABLE
+from common.config import DEFAULT_TABLE
 from common.const import UPLOAD_PATH
 from common.const import default_cache_dir
-from common.const import UPLOAD_PATH
 from service.load import do_load
 from service.search import do_search
 from service.count import do_count
@@ -21,6 +20,7 @@ from diskcache import Cache
 import shutil
 import urllib
 import os
+import time
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
@@ -28,7 +28,6 @@ from rdkit.Chem import Draw
 
 
 app = Flask(__name__)
-ALLOWED_EXTENSIONS = set(['jpg', 'png'])
 app.config['UPLOAD_FOLDER'] = UPLOAD_PATH
 app.config['JSON_SORT_KEYS'] = False
 CORS(app)
@@ -57,6 +56,10 @@ def do_delete_api():
         add_argument('Table', type=str). \
         parse_args()
     table_name = args['Table']
+    try:
+        os.remove(default_cache_dir+'/cache.db')
+    except:
+        print("cannot remove:", default_cache_dir+'/cache.db')
     print("delete table.")
     status = do_delete(table_name)
     return "{}".format(status)
@@ -102,7 +105,15 @@ def do_search_api():
     if not molecular_name:
         return "no molecular"
     if molecular_name:
-        res_smi,res_distance = do_search(table_name, molecular_name, top_k)
+        try:
+            shutil.rmtree(UPLOAD_PATH)
+            os.mkdir(UPLOAD_PATH)
+        except:
+            print("cannot remove:", UPLOAD_PATH)
+        try:
+            res_smi, res_distance, ids= do_search(table_name, molecular_name, top_k)
+        except:
+            return "There has no results, please input the correct molecular and ensure the table has data."
         res_mol = []
         for i in range(len(res_smi)):
             mol = Chem.MolFromSmiles(res_smi[i])
@@ -110,10 +121,11 @@ def do_search_api():
         print("res_mol:",len(res_mol))
         re = {}
         for i in range(len(res_smi)):
+            times = int(time.time())
             sub_res_mol = [res_mol[i]]
             sub_img = Draw.MolsToGridImage(sub_res_mol, molsPerRow=1, subImgSize=(500, 500))
-            sub_img.save(UPLOAD_PATH + "/similarities_results_"+str(i+1)+".png")
-            res_img = request.url_root + "data/similarities_results_"+str(i+1)+".png"
+            sub_img.save(UPLOAD_PATH + "/similarities_results_" + str(ids[i]) + "_" + str(times) + ".png")
+            res_img = request.url_root + "data/similarities_results_"+ str(ids[i]) + "_" + str(times) +".png"
             re[res_img] = [res_smi[i],res_distance[i]]
         # img = Draw.MolsToGridImage(res_mol, molsPerRow=1, subImgSize=(500, 500),legends=["%s - %s" % (res_smi[x] , str(res_distance[x])) for x in range(len(res_mol))])
         return jsonify(re), 200

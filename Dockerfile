@@ -1,12 +1,15 @@
-From conda/miniconda3
+From conda/miniconda3-centos7
 
-WORKDIR /app/src
+WORKDIR /app
 COPY . /app
 
-RUN apt-get update
-RUN pip install /app/requirements.txt
-RUN conda install -y -c rdkit rdkit
+RUN yum -y update
+RUN yum install -y libXext libSM libXrender
+
+RUN conda update -n base -c defaults conda
+RUN conda install -c rdkit rdkit -y
+RUN pip install -r /app/requirements.txt
 
 RUN mkdir -p /tmp/result-mols
 
-CMD python app.py
+CMD python src/app.py
