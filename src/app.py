@@ -19,12 +19,13 @@ from numpy import linalg as LA
 from diskcache import Cache
 import shutil
 import urllib
-import os
 import time
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit import DataStructs
 from rdkit.Chem import Draw
+import psycopg2
+from service.load import connect_postgres, delete_pg_table
 
 
 app = Flask(__name__)
@@ -56,10 +57,20 @@ def do_delete_api():
         add_argument('Table', type=str). \
         parse_args()
     table_name = args['Table']
+    # try:
+    #     os.remove(default_cache_dir+'/cache.db')
+    # except:
+    #     print("cannot remove:", default_cache_dir+'/cache.db')
     try:
-        os.remove(default_cache_dir+'/cache.db')
+        os.remove(default_cache_dir+'/id_name.csv')
     except:
-        print("cannot remove:", default_cache_dir+'/cache.db')
+        print("cannot remove:", default_cache_dir+'/id_name.csv')
+    try:
+        connect_postgres()
+        delete_pg_table()
+    except:
+        print()
+
     print("delete table.")
     status = do_delete(table_name)
     return "{}".format(status)
