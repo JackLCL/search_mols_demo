@@ -5,7 +5,7 @@ from indexer.index import milvus_client, create_table, insert_vectors, delete_ta
 from diskcache import Cache
 from encoder.encode import smiles_to_vec
 from common.config import DEFAULT_TABLE, PG_HOST, PG_PORT, PG_USER, PG_PASSWORD, PG_DATABASE, PG_TABLE
-from load import connect_postgres
+from load.py import connect_postgres
 
 def query_smi_from_ids(vids):
     res = []
