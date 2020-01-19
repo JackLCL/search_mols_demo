@@ -10,8 +10,11 @@ from diskcache import Cache
 from indexer.index import milvus_client, create_table, insert_vectors, delete_table, search_vectors, create_index,has_table
 
 def connect_postgres():
-    conn = psycopg2.connect(host=PG_HOST,port=PG_PORT,user=PG_USER,password=PG_PASSWORD,database=PG_DATABASE)
-    print('connect postgres successfully')
+    try:
+        conn = psycopg2.connect(host=PG_HOST,port=PG_PORT,user=PG_USER,password=PG_PASSWORD,database=PG_DATABASE)
+        print('connect postgres successfully')
+    except:
+        print('connect postgres failed')    
     return conn
 
 def create_pg_table():
