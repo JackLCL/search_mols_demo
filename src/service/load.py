@@ -79,7 +79,7 @@ def do_load(table_name, database_path):
 
         create_index(index_client, table_name)
 
-        with open(default_cache_dir+'id_name.csv','a') as f:
+        with open('id_name.csv','a') as f:
             writer = csv.writer(f)
             writer.writerows(zip(total_ids,names))
 
