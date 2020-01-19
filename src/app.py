@@ -62,9 +62,9 @@ def do_delete_api():
     # except:
     #     print("cannot remove:", default_cache_dir+'/cache.db')
     try:
-        os.remove(default_cache_dir+'/id_name.csv')
+        os.remove('id_name.csv')
     except:
-        print("cannot remove:", default_cache_dir+'/id_name.csv')
+        print("cannot remove:",'id_name.csv')
     try:
         connect_postgres()
         delete_pg_table()
